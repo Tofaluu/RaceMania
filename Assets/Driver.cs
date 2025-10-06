@@ -8,12 +8,20 @@ public class Driver : MonoBehaviour
     [SerializeField] float acceleration = 2f;
 
     float currentMove = 0f;
+    float speedMultiplier = 1f;
+    int roadContactCount = 0;
+    RoadSpeedModifier speedMod;
 
+    void Start()
+    {
+        speedMod = GetComponent<RoadSpeedModifier>();
+    }
     // Update is called once per frame
     void Update()
     {
         float steer = 0;
         float targetMove = 0;
+
         if (Keyboard.current.wKey.isPressed)
         {
             targetMove = 1;
@@ -39,10 +47,13 @@ public class Driver : MonoBehaviour
             }
         }
 
-        float moveAmount = currentMove * moveSpeed * Time.deltaTime;
+        float speedMultiplier = speedMod != null ? speedMod.speedMultiplier : 1f;
+        
+        float moveAmount = currentMove * moveSpeed * speedMultiplier * Time.deltaTime;
         float steerAmount = steer * steerSpeed * Time.deltaTime;
 
-        transform.Rotate(0, 0, steerAmount); 
+        transform.Rotate(0, 0, steerAmount);
         transform.Translate(0, moveAmount, 0);
     }
+
 }

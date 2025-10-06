@@ -8,7 +8,12 @@ public class Driver2 : MonoBehaviour
     [SerializeField] float acceleration = 2f;
 
     float currentMove = 0f;
+    RoadSpeedModifier speedMod;
 
+    void Start()
+    {
+        speedMod = GetComponent<RoadSpeedModifier>();
+    }
     // Update is called once per frame
     void Update()
     {
@@ -39,7 +44,9 @@ public class Driver2 : MonoBehaviour
             }
         }
 
-        float moveAmount = currentMove * moveSpeed * Time.deltaTime;
+        float speedMultiplier = speedMod != null ? speedMod.speedMultiplier : 1f;
+
+        float moveAmount = currentMove * moveSpeed * speedMultiplier * Time.deltaTime;
         float steerAmount = steer * steerSpeed * Time.deltaTime;
 
         transform.Rotate(0, 0, steerAmount); 
