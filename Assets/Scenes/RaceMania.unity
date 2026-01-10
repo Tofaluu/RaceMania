@@ -14206,7 +14206,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -10000
+  m_SortingOrder: -9999
   m_Sprite: {fileID: -5827266158817841635, guid: 8048cebf38cae14468a9b020d516e7b3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -30647,7 +30647,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -10000
+  m_SortingOrder: -9999
   m_Sprite: {fileID: 7798187541327066252, guid: 30b2389608ad2db45b92cba189170c6e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -72822,6 +72822,7 @@ MonoBehaviour:
   countdownTexts:
   - {fileID: 773806494}
   - {fileID: 737972673}
+  playAgainButton: {fileID: 0}
   initialCountdownTime: 3
   raceCars:
   - {fileID: 2092660526}
@@ -99498,7 +99499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   steerSpeed: 200
-  moveSpeed: 20
+  moveSpeed: 17.5
   acceleration: 1
   reverseFactor: 0.5
 --- !u!114 &1716586566
@@ -122122,7 +122123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Driver
   steerSpeed: 200
-  moveSpeed: 20
+  moveSpeed: 17.5
   acceleration: 1
   reverseFactor: 0.5
 --- !u!212 &2092660528
