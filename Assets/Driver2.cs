@@ -1,55 +1,67 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class Driver2 : MonoBehaviour
 {
-    [SerializeField] float steerSpeed = 200f;
-    [SerializeField] float moveSpeed = 15f;
-    [SerializeField] float acceleration = 2f;
+    [Header("Driving")]
+    [SerializeField] float steerSpeed = 200f;     // deg/s at full steer
+    [SerializeField] float moveSpeed  = 30f;      // m/s at full throttle
+    [SerializeField] float acceleration = 6f;     // how fast currentMove chases target
 
-    float currentMove = 0f;
+    [Header("Reverse")]
+    [SerializeField] float reverseFactor = 0.5f;  // your -0.5f from original
+
+    Rigidbody2D rb;
     RoadSpeedModifier speedMod;
 
-    void Start()
+    float currentMove;   // -1..1 (reverse..forward)
+    float targetMove;    // desired throttle
+    float steer;         // -1..1
+
+    void Awake()
     {
+        rb = GetComponent<Rigidbody2D>();
         speedMod = GetComponent<RoadSpeedModifier>();
     }
-    // Update is called once per frame
+
     void Update()
     {
-        float steer = 0;
-        float targetMove = 0;
-        if (Keyboard.current.upArrowKey.isPressed)
-        {
-            targetMove = 1;
-        }
-        else if (Keyboard.current.downArrowKey.isPressed)
-        {
-            targetMove = -0.5f;
-        }
+        // --- Read input in Update (per-frame) ---
+        targetMove = 0f;
+        if (Keyboard.current.upArrowKey.isPressed) targetMove = 1f;
+        else if (Keyboard.current.downArrowKey.isPressed) targetMove = -reverseFactor;
 
-        // Accelerate/decelerate currentMove toward targetMove
-        currentMove = Mathf.MoveTowards(currentMove, targetMove, acceleration * Time.deltaTime);
-
-        // Only allow steering if the car is moving
+        steer = 0f;
+        // Only allow steering when moving a bit
         if (Mathf.Abs(currentMove) > 0.01f)
         {
-            if (Keyboard.current.leftArrowKey.isPressed)
-            {
-                steer = 1;
-            }
-            else if (Keyboard.current.rightArrowKey.isPressed)
-            {
-                steer = -1;
-            }
+            if (Keyboard.current.leftArrowKey.isPressed) steer =  1f;
+            else if (Keyboard.current.rightArrowKey.isPressed) steer = -1f;
         }
+    }
 
-        float speedMultiplier = speedMod != null ? speedMod.speedMultiplier : 1f;
+    void FixedUpdate()
+    {
+        // --- Smooth throttle ---
+        currentMove = Mathf.MoveTowards(currentMove, targetMove, acceleration * Time.fixedDeltaTime);
 
-        float moveAmount = currentMove * moveSpeed * speedMultiplier * Time.deltaTime;
-        float steerAmount = steer * steerSpeed * Time.deltaTime;
+        float roadMultiplier = speedMod != null ? speedMod.speedMultiplier : 1f;
 
-        transform.Rotate(0, 0, steerAmount); 
-        transform.Translate(0, moveAmount, 0);
+        // Forward direction is +Y in top-down car sprites
+        Vector2 fwd = transform.up;
+
+        // Desired velocity from throttle
+        Vector2 desiredVel = fwd * (currentMove * moveSpeed * roadMultiplier);
+
+        // Apply velocity directly (simple, responsive)
+        rb.linearVelocity = desiredVel;
+
+        // Steering scales with speed so you don’t spin when stopped
+        float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / (moveSpeed * Mathf.Max(0.01f, roadMultiplier)));
+        float steerThisFrame = steer * steerSpeed * speed01 * Time.fixedDeltaTime;
+
+        // Rotate around Z (positive steer = left turn when facing +Y)
+        rb.MoveRotation(rb.rotation + steerThisFrame);
     }
 }
