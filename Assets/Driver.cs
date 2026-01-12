@@ -60,7 +60,7 @@ public class Driver : MonoBehaviour
         // When in reverse and no input, stop the car faster
         else if (currentMove < 0f && targetMove == 0f)
         {
-            accelRate = acceleration * 2f;
+            accelRate = acceleration * 3f;
         }
         currentMove = Mathf.MoveTowards(currentMove, targetMove, accelRate * Time.fixedDeltaTime);
 
