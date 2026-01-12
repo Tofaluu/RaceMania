@@ -8,6 +8,7 @@ public class Driver2 : MonoBehaviour
     [SerializeField] float steerSpeed = 200f;     // deg/s at full steer
     [SerializeField] float moveSpeed  = 30f;      // m/s at full throttle
     [SerializeField] float acceleration = 6f;     // how fast currentMove chases target
+    [SerializeField] float brakeDeceleration = 2f; // faster deceleration when braking to 0
 
     [Header("Reverse")]
     [SerializeField] float reverseFactor = 0.5f;  // your -0.5f from original
@@ -18,6 +19,7 @@ public class Driver2 : MonoBehaviour
     float currentMove;   // -1..1 (reverse..forward)
     float targetMove;    // desired throttle
     float steer;         // -1..1
+    bool isBraking;      // true when brake key is pressed
 
     void Awake()
     {
@@ -29,8 +31,13 @@ public class Driver2 : MonoBehaviour
     {
         // --- Read input in Update (per-frame) ---
         targetMove = 0f;
+        isBraking = false;
         if (Keyboard.current.upArrowKey.isPressed) targetMove = 1f;
-        else if (Keyboard.current.downArrowKey.isPressed) targetMove = -reverseFactor;
+        else if (Keyboard.current.downArrowKey.isPressed)
+        {
+            targetMove = -reverseFactor;
+            isBraking = true;
+        }
 
         steer = 0f;
         // Only allow steering when moving a bit
@@ -44,7 +51,18 @@ public class Driver2 : MonoBehaviour
     void FixedUpdate()
     {
         // --- Smooth throttle ---
-        currentMove = Mathf.MoveTowards(currentMove, targetMove, acceleration * Time.fixedDeltaTime);
+        float accelRate = acceleration;
+        // Use faster deceleration when braking from forward motion to 0
+        if (isBraking && currentMove > 0f)
+        {
+            accelRate = brakeDeceleration;
+        }
+        // When in reverse and no input, stop the car faster
+        else if (currentMove < 0f && targetMove == 0f)
+        {
+            accelRate = acceleration * 2f;
+        }
+        currentMove = Mathf.MoveTowards(currentMove, targetMove, accelRate * Time.fixedDeltaTime);
 
         float roadMultiplier = speedMod != null ? speedMod.speedMultiplier : 1f;
 

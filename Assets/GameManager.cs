@@ -22,6 +22,9 @@ public class GameManager : MonoBehaviour
     
     void Awake()
     {
+        // Cap the frame rate at 120 FPS
+        Application.targetFrameRate = 120;
+
         if (Instance == null)
         {
             Instance = this;
